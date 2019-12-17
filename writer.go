@@ -15,24 +15,24 @@ var errRenamingFile = errors.New("Error renaming File")
 type RotateWriter struct {
 	lock     sync.Mutex
 	filename string // should be set to the actual filename
-	duration int
+	duration time.Duration
 	fp       *os.File
 }
 
 // NewWriter makes a new RotateWriter. Return nil if error occurs during setup.
-func NewWriter(filename string, timeInSec int) (*RotateWriter, error) {
+func NewWriter(filename string, duration time.Duration) (*RotateWriter, error) {
 	// Check file before we initialize.
-	return new(filename, timeInSec)
+	return new(filename, duration)
 }
 
-func new(filename string, duration int) (*RotateWriter, error) {
+func new(filename string, duration time.Duration) (*RotateWriter, error) {
 	w := &RotateWriter{filename: filename, duration: duration}
 	err := w.Rotate()
 	if err != nil {
 		return nil, err
 	}
 	// Trigger a rotation after every x interval.
-	ticker := time.NewTicker(time.Duration(int64(w.duration)) * time.Second)
+	ticker := time.NewTicker(duration)
 	go func() {
 		for {
 			select {
@@ -71,7 +71,7 @@ func (w *RotateWriter) Rotate() (err error) {
 	// Rename dest file if it already exists
 	_, err = os.Stat(w.filename)
 	if err == nil {
-		err = os.Rename(w.filename, w.filename+"."+time.Now().Format(time.RFC3339))
+		err = os.Rename(w.filename, w.filename+".1")
 		if err != nil {
 			return errRenamingFile
 		}
