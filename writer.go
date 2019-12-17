@@ -66,7 +66,7 @@ func (w *RotateWriter) Rotate() (err error) {
 	// Rename dest file if it already exists
 	_, err = os.Stat(w.filename)
 	if err == nil {
-		err = os.Rename(w.filename, w.filename + ".1")
+		err = os.Rename(w.filename, w.filename+".1")
 		if err != nil {
 			return err
 		}
