@@ -2,15 +2,10 @@ package writer
 
 import (
 	"bufio"
-	"errors"
 	"os"
 	"sync"
 	"time"
 )
-
-var errCreatingFile = errors.New("Error creating new file")
-var errClosingFile = errors.New("Error closing File")
-var errRenamingFile = errors.New("Error renaming File")
 
 type RotateWriter struct {
 	lock     sync.Mutex
@@ -65,22 +60,22 @@ func (w *RotateWriter) Rotate() (err error) {
 		err = w.fp.Close()
 		w.fp = nil
 		if err != nil {
-			return errClosingFile
+			return err
 		}
 	}
 	// Rename dest file if it already exists
 	_, err = os.Stat(w.filename)
 	if err == nil {
-		err = os.Rename(w.filename, w.filename+".1")
+		err = os.Rename(w.filename, w.filename + ".1")
 		if err != nil {
-			return errRenamingFile
+			return err
 		}
 	}
 
 	// Create a file.
 	w.fp, err = os.Create(w.filename)
 	if err != nil {
-		return errCreatingFile
+		return err
 	}
 	return nil
 }
